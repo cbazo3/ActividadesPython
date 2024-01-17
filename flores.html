@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clasificador de Flores Iris</title>
+    <style type="text/css">
+        body {
+            background-color: #f9c4d9; 
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #ff69b4;
+
+        }
+
+        p {
+            color: #ff1493; 
+        }
+
+        label {
+            color: #ff69b4;
+        }
+
+        input {
+            padding: 5px;
+            border: 1px solid #ff69b4;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #ff69b4;
+            color: white; 
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ff1493; 
+        }
+    </style>
+</head>
+<body>
+    <h1><u>Datos de las flores</u></h1>
+    <p>Ingresa los datos del sépalo y el pétalo:</p>
+    <label for="sepaloLongitud">Longitud del Sépalo (cm):</label>
+    <input type="number" id="sepaloLongitud" step="0.1" min="0" max="10">
+    <br>
+    <label for="sepaloAnchura">Ancho del Sépalo (cm):</label>
+    <input type="number" id="sepaloAnchura" step="0.1" min="0" max="10">
+    <br>
+    <label for="petaloLongitud">Longitud del Pétalo (cm):</label>
+    <input type="number" id="petaloLongitud" step="0.1" min="0" max="10">
+    <br>
+    <label for="petaloAnchura">Ancho del Pétalo (cm):</label>
+    <input type="number" id="petaloAnchura" step="0.1" min="0" max="10">
+    <br>
+    <button onclick="clasificarFlor()">Clasificar Flor</button>
+    <p id="resultado"></p>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.4.5/jscolor.min.js"></script>
+    <script src="https://unpkg.com/brain.js"></script>
+
+    <script type="text/javascript">
+        var data = [
+            // Ejemplos para Iris-setosa
+            { input: { sepaloLongitudCm: 5.1, sepaloAnchuraCm: 3.5, petaloLongitudCm: 1.4, petaloAnchuraCm: 0.2 }, output: { IrisSetosa: 1, IrisVersicolor: 0, IrisVirginica: 0 } },
+            { input: { sepaloLongitudCm: 4.9, sepaloAnchuraCm: 3.0, petaloLongitudCm: 1.4, petaloAnchuraCm: 0.2 }, output: { IrisSetosa: 1, IrisVersicolor: 0, IrisVirginica: 0 } },
+            { input: { sepaloLongitudCm: 4.7, sepaloAnchuraCm: 3.2, petaloLongitudCm: 1.3, petaloAnchuraCm: 0.2 }, output: { IrisSetosa: 1, IrisVersicolor: 0, IrisVirginica: 0 } },
+            { input: { sepaloLongitudCm: 4.6, sepaloAnchuraCm: 3.1, petaloLongitudCm: 1.5, petaloAnchuraCm: 0.2 }, output: { IrisSetosa: 1, IrisVersicolor: 0, IrisVirginica: 0 } },
+            { input: { sepaloLongitudCm: 5.0, sepaloAnchuraCm: 3.6, petaloLongitudCm: 1.4, petaloAnchuraCm: 0.2 }, output: { IrisSetosa: 1, IrisVersicolor: 0, IrisVirginica: 0 } },
+
+            // Ejemplos para Iris-versicolor
+            { input: { sepaloLongitudCm: 7.0, sepaloAnchuraCm: 3.2, petaloLongitudCm: 4.7, petaloAnchuraCm: 1.4 }, output: { IrisSetosa: 0, IrisVersicolor: 1, IrisVirginica: 0 } },
+            { input: { sepaloLongitudCm: 6.4, sepaloAnchuraCm: 3.2, petaloLongitudCm: 4.5, petaloAnchuraCm: 1.5 }, output: { IrisSetosa: 0, IrisVersicolor: 1, IrisVirginica: 0 } },
+            { input: { sepaloLongitudCm: 6.9, sepaloAnchuraCm: 3.1, petaloLongitudCm: 4.9, petaloAnchuraCm: 1.5 }, output: { IrisSetosa: 0, IrisVersicolor: 1, IrisVirginica: 0 } },
+            { input: { sepaloLongitudCm: 5.5, sepaloAnchuraCm: 2.3, petaloLongitudCm: 4.0, petaloAnchuraCm: 1.3 }, output: { IrisSetosa: 0, IrisVersicolor: 1, IrisVirginica: 0 } },
+            { input: { sepaloLongitudCm: 6.5, sepaloAnchuraCm: 2.8, petaloLongitudCm: 4.6, petaloAnchuraCm: 1.5 }, output: { IrisSetosa: 0, IrisVersicolor: 1, IrisVirginica: 0 } },
+
+            // Ejemplos para Iris-virginica
+            { input: { sepaloLongitudCm: 7.1, sepaloAnchuraCm: 3.0, petaloLongitudCm: 5.9, petaloAnchuraCm: 2.1 }, output: { IrisSetosa: 0, IrisVersicolor: 0, IrisVirginica: 1 } },
+            { input: { sepaloLongitudCm: 6.3, sepaloAnchuraCm: 2.9, petaloLongitudCm: 5.6, petaloAnchuraCm: 1.8 }, output: { IrisSetosa: 0, IrisVersicolor: 0, IrisVirginica: 1 } },
+            { input: { sepaloLongitudCm: 6.5, sepaloAnchuraCm: 3.0, petaloLongitudCm: 5.8, petaloAnchuraCm: 2.2 }, output: { IrisSetosa: 0, IrisVersicolor: 0, IrisVirginica: 1 } },
+            { input: { sepaloLongitudCm: 7.6, sepaloAnchuraCm: 3.0, petaloLongitudCm: 6.6, petaloAnchuraCm: 2.1 }, output: { IrisSetosa: 0, IrisVersicolor: 0, IrisVirginica: 1 } },
+            { input: { sepaloLongitudCm: 4.9, sepaloAnchuraCm: 2.5, petaloLongitudCm: 4.5, petaloAnchuraCm: 1.7 }, output: { IrisSetosa: 0, IrisVersicolor: 0, IrisVirginica: 1 } }
+        ];
+
+        var network = new brain.NeuralNetwork();
+        network.train(data);
+
+        function clasificarFlor() {
+            var sepaloLongitud = parseFloat(document.getElementById("sepaloLongitud").value);
+            var sepaloAnchura = parseFloat(document.getElementById("sepaloAnchura").value);
+            var petaloLongitud = parseFloat(document.getElementById("petaloLongitud").value);
+            var petaloAnchura = parseFloat(document.getElementById("petaloAnchura").value);
+
+            var entrada = {
+                sepaloLongitudCm: sepaloLongitud,
+                sepaloAnchuraCm: sepaloAnchura,
+                petaloLongitudCm: petaloLongitud,
+                petaloAnchuraCm: petaloAnchura
+            };
+
+            var resultado = network.run(entrada);
+
+            if (resultado.IrisSetosa > resultado.IrisVersicolor && resultado.IrisSetosa > resultado.IrisVirginica) {
+                document.getElementById("resultado").textContent = "Resultado: Iris-setosa";
+            } else if (resultado.IrisVersicolor > resultado.IrisVirginica) {
+                document.getElementById("resultado").textContent = "Resultado: Iris-versicolor";
+            } else {
+                document.getElementById("resultado").textContent = "Resultado: Iris-virginica";
+            }
+        }
+    </script>
+</body>
+</html>
